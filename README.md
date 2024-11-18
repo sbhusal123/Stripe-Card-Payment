@@ -77,4 +77,6 @@ This steps can be handled from the frontend side, any response from the stripe n
 
 - [Stripe Rest API](https://docs.stripe.com/api?lang=curl)
 
+- [Learn how to use the Payment Intents API for Stripe payments.](https://docs.stripe.com/payments/payment-intents?lang=python)
+
 - [Test Card References](https://docs.stripe.com/testing?testing-method=card-numbers)

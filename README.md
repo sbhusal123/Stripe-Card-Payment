@@ -1,70 +1,80 @@
-# Getting Started with Create React App
+# Stripe Card Payment Integration:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Libraries Tooling:**
+- [``@stripe/react-stripe-js``](https://www.npmjs.com/package/@stripe/react-stripe-js)
 
-## Available Scripts
+```js
+"": "^2.9.0",
+"@stripe/stripe-js": "^4.10.0",
+```
 
-In the project directory, you can run:
+## Steps:
 
-### `yarn start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Reference From Stripe Python SDK:**
+- [Payment Intent Request Params and Response Object](https://docs.stripe.com/api/payment_intents/create?lang=python)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [Confirming Payment Intent and Response Object](https://docs.stripe.com/api/payment_intents/confirm?lang=python)
 
-### `yarn test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 1. Payment Intent Creation: (Backend):
 
-### `yarn eject`
+Payment Intent is created on stripe side after the user confirms to buy a product.
+This must be done from the backend passing product id, and other details. 
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Product details, are stored on a payment intent meta. 
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Payment intent docs for python stripe sdk can be found here -> https://docs.stripe.com/api/payment_intents/create?lang=python 
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Response from the api consists of **payment intent id** and **client secret** to be used in further steps.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+**Few Caveats:**
+-  Consider Passing Metadata into payment intent api at this phase from backend.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+-  Store few infos from response on database.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> **Note: Please refer docs above for response and payload for payment intent.**
 
-### Code Splitting
+So, basically input at this stage is, product infos and amount, output is payment intent infos.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+## 2. Creating a Payment Object: (Frontend)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
+What we have till now is id and secret for payment intent. So, in this phase, a payment is confirmed in this phase by:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Creating a payment method object from the cards details in this screen. This gives us a payment id.
 
-### Advanced Configuration
+- Payment id thus obtained with, payment intent secret and payment intent id can now be used further down the steps involved.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 3. Confirming A Payment: (Backend)
 
-### Deployment
+At this stage, we have: **payment method, payment intent id, payment intent secret** from stripe. 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-### `yarn build` fails to minify
+Now, we can confirm the payment intent by passing those details to the backend.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+> Docs:: [Confirming Payment Request Params and Response](https://docs.stripe.com/api/payment_intents/confirm?lang=python)
+
+At this phase, backend should return a payment intent status, payment might not be confirmed please read the docs [here](https://docs.stripe.com/api/payment_intents/confirm?lang=python)
+
+## 4. Payment Verification (Optional):
+
+> If the selected payment method requires additional authentication steps, the PaymentIntent will transition to the requires_action status and suggest additional actions via ``next_action`` [Reference](https://docs.stripe.com/api/payment_intents/confirm?lang=python)
+
+This steps can be handled from the frontend side, any response from the stripe needs to be communicated to the backend to ensure that the payment is successful.
+
+
+# References
+- [Stripe Python](https://docs.stripe.com/api?lang=python)
+
+- [Stripe JS](https://docs.stripe.com/js)
+
+- [Stripe Rest API](https://docs.stripe.com/api?lang=curl)
+
+- [Test Card References](https://docs.stripe.com/testing?testing-method=card-numbers)

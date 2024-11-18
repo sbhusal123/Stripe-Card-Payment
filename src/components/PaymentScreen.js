@@ -54,6 +54,7 @@ const CustomCardElement = () => {
 
         const card = elements.getElement(CardElement);
 
+        // on submitting a payment method is created with the card details
         const { error, paymentMethod } = await stripe.createPaymentMethod({
             type: 'card',
             card: card,
